@@ -1,0 +1,315 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Decision Trees :
+
+```{r}
+dataset=read.csv("C://Users//Administrator//Desktop//wines_velse1.csv",header=T)
+dataset
+
+```
+
+```{r}
+dim(dataset)
+
+sample_size=sample.int(n=nrow(dataset),size=floor(0.70*nrow(dataset)),replace = F)
+train=dataset[sample_size,]
+test=dataset[-sample_size,]
+
+tree_model=rpart(type~.,data=train)
+
+
+predicted_model=predict(tree_model,newdata=test,type="class")
+summary(predicted_model)
+confmat=table(predicted_model,test$type)
+accuracy=sum(diag(confmat))/sum(confmat)
+accuracy
+
+```
+
+
+### Predictive analysis using regression model :
+
+```{r}
+employee=read.csv("C://Users//Administrator//Desktop//regression_data.csv",header=T)
+employee
+
+
+employee$Salary=as.numeric(employee$Salary)
+dim(employee)
+```
+
+
+
+```{r}
+sample_size=sample.int(n=nrow(employee),size=floor(0.70*nrow(employee)),replace = F)
+
+train_data=employee[sample_size,]
+test_data=employee[-sample_size,]
+
+regression_model=lm(Salary~Exp_year,data=train_data)
+
+summary(regression_model)
+
+
+
+```
+
+
+```{r}
+predicted_model_regression=predict(regression_model,newdata = test_data)
+predicted_model_regression
+
+```
+
+### plotting the model based on training dataset :
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+ggplot() + geom_point(aes(x=train_data$Exp_year,y=train_data$Salary),col="red",size=2) + geom_line(aes(x=train_data$Exp_year,y=predict(regression_model,train_data)),col="blue") + theme_bw()
+
+
+```
+
+### Ploting regression model based on new data on test dataset:
+
+
+```{r}
+
+ggplot() + geom_point(aes(x=test_data$Exp_year,y=test_data$Salary),col="red",size=2) + geom_line(aes(x=train_data$Exp_year,y=predict(regression_model,train_data)),col="blue") + theme_bw() + labs(x="Years of Experience",y="Salary",title="Predictive Analysis using Regression Model")
+
+```
+### Naive Bayes algorithm applying on weather data and we should justify that whether a boy will play or not : Classification based problem :
+
+```{r}
+data=read.csv("C://Users//Administrator//Desktop//weather_data_rf.csv",header=T)
+data
+
+sapply(data,class)
+dim(data)
+```
+
+```{r}
+index_no=sample.int(n=nrow(data),size=floor(0.77*nrow(data)),replace = F)
+training_data=data[index_no,]
+testing_data=data[-index_no,]
+
+library(naivebayes)
+training_model=naive_bayes(Play~Temperature+Outlook,training_data)
+
+
+predicting_model=predict(training_model,newdata = testing_data)
+
+
+confmat=table(predicting_model,testing_data$Play)
+confmat
+
+accuracy=sum(diag(confmat))*100/sum(confmat)
+accuracy
+```
+
+### Naive Bayes : 
+```{r}
+purchase_data=read.csv("C://Users//Administrator//Desktop//Social_Network_Ads.csv",header = T)
+purchase_data=purchase_data[,3:5]
+purchase_data$Purchased=as.factor(purchase_data$Purchased)
+purchase_data
+
+
+
+```
+
+
+```{r}
+sample_data=sample.int(n=nrow(purchase_data),size=floor(0.75*nrow(purchase_data)),replace=F)
+train_data=purchase_data[sample_data,]
+test_data=purchase_data[-sample_data,]
+
+train_data[-3]=scale(train_data[-3])
+test_data[-3]=scale(test_data[-3])
+
+naive_model=naive_bayes(Purchased~EstimatedSalary,train_data)
+
+predicting_model=predict(naive_model,newdata=test_data)
+
+predicting_model
+
+confusion_matrix=table(predicting_model,test_data$Purchased)
+accuracy=sum(diag(confusion_matrix))*100/sum(confusion_matrix)
+accuracy
+
+```
+
+### Multiple Linear Regression Model:
+
+```{r}
+dataset=read.csv("C://Users//Administrator//Desktop//50_Startup.csv",header = T)
+dataset
+
+
+```
+
+
+```{r}
+dim(dataset)
+sapply(dataset,class)
+colSums(!is.na(dataset))*100/nrow(dataset)
+dataset=dataset[,-4]
+dataset
+
+
+```
+
+```{r}
+
+sample_size=sample.int(n=nrow(dataset),size=floor(0.80*nrow(dataset)),replace = F)
+
+
+
+train_model=dataset[sample_size,]
+test_model=dataset[-sample_size,]
+
+
+
+regression_model=lm(formula=Profit ~ .,data=train_model)
+summary(regression_model)
+predicted_model_regression=predict(regression_model,newdata=test_model)
+predicted_model_regression
+
+
+
+
+```
+### Here the invester should invest on the 5th company to make more profit.........................   
+
+
+
+
+
+
+
+### Logistic Regression Predictive model :
+
+```{r}
+logis=read.csv("C://Users//Administrator//Desktop//Social_Network_Ads.csv",header = T)
+logis
+dim(logis)
+str(logis)
+```
+
+
+```{r}
+sample_size=sample.int(n=nrow(logis),size=floor(0.75*nrow(logis)),replace = F)
+train_data=logis[sample_size,]
+test_data=logis[-sample_size,]
+
+train_data[-3]=scale(train_data[-3])
+test_data[-3]=scale(test_data[-3])
+
+
+
+training_data_model= glm(Purchased~.,family = binomial,data=train_data)
+
+predicted_model=predict(training_data_model,type='response',newdata=test_data[-3])
+new_pred_modell=if_else(predicted_model>=0.5,1,0)
+
+new_pred_modell
+
+
+
+```
+
+
+```{r}
+library(ElemStatLearn)
+
+set = test_data
+
+X1 = seq(min(set[, 1]) - 1, max(set[, 1]) + 1, by = 0.01)
+X2 = seq(min(set[, 2]) - 1, max(set[, 2]) + 1, by = 0.01)
+
+grid_set = expand.grid(X1, X2)
+colnames(grid_set) = c('Age', 'EstimatedSalary')
+prob_set = predict(training_data_model, type = 'response', newdata = grid_set)
+y_grid = ifelse(prob_set > 0.5, 1, 0)
+plot(set[, -3],
+     main = 'Logistic Regression Model',
+     xlab = 'Age', ylab = ' Salary',
+     xlim = range(X1), ylim = range(X2))
+contour(X1, X2, matrix(as.numeric(y_grid), length(X1), length(X2)), add = TRUE)
+points(grid_set, pch = '.', col = ifelse(y_grid == 1, 'springgreen3', 'tomato'))
+points(set, pch = 21, bg = ifelse(set[, 3] == 1, 'green4', 'red3'))
+
+````
+### Weather a boy will play or not - Prediction by using naive bayes classification
+
+```{r}
+data2=read.csv("C://Users//Administrator//Desktop//weather_data_rf.csv")
+
+
+
+
+sample_size=sample.int(n=nrow(data2),size=floor(0.75*nrow(data2)),replace=F)
+
+
+ train_data=data2[sample_size,]
+test_data=data2[-sample_size,]
+
+train_data_model=naive_bayes(Play~Wind+Outlook+Temperature, data=train_data)
+
+
+predicted_model=predict(train_data_model,newdata=test_data)
+
+
+
+
+
+
+cm=table(test_data$Play,predicted_model)
+
+accuracy=sum(diag(cm))*100/sum(cm)
+accuracy
+
+```
+### Prediction of petrol Price in future : From Jan 2015-June 2017
+
+```{r}
+petrol=read.csv("C://Users//Administrator//Desktop//petrol_Price.csv",header = T)
+petrol
+sapply(petrol,class)
+
+cor(petrol)
+```
+
+```{r}
+sample_size=sample.int(n=nrow(petrol),size=floor(0.7*nrow(petrol)),replace=F)
+sample_size
+
+train_data=petrol[sample_size,]
+test_data=petrol[-sample_size,]
+
+model=lm(Petrol.Price~.,data=train_data)
+
+prediction=predict(model,newdata = test_data)
+prediction
+
+
+```
+
+
+```{r}
+ggplot() + geom_point(aes(x=test_data$Month,y=test_data$Petrol.Price,group=1),col="red") + geom_line(aes(x=train_data$Month,y=predict(model,newdata=train_data),group=1),col="blue") 
+
+
+
+```
+
+
